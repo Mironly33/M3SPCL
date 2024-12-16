@@ -31,11 +31,11 @@ def TT_split(n_all, seed):
     test_idx = random_idx[-test_num:]   
     return train_idx, test_idx
 
-# 写日志，日志器logger
+
 def initLogging(logFilename):
-    # 日志格式化方式
+   
     LOG_FORMAT = "%(asctime)s\tFile \"%(filename)s\",LINE %(lineno)-4d : %(levelname)-8s %(message)s"
-    # 日期格式化方式
+   
     DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
     logging.basicConfig(filename=logFilename, level=logging.DEBUG, format=LOG_FORMAT, datefmt=DATE_FORMAT)
     formatter = logging.Formatter(LOG_FORMAT);
@@ -131,7 +131,7 @@ def classification_metric(output,y_true, average='macro', decimals=6):
         accuracy = np.round(accuracy, decimals)*100
 
         # precision
-        precision = metrics.precision_score(y_true, y_pred, average=average) # 宏平均，每个类别的准确率取平均值
+        precision = metrics.precision_score(y_true, y_pred, average=average) # 
         precision = np.round(precision, decimals)*100
 
         # recall
@@ -157,35 +157,30 @@ def euclidean_dist(x, y):
 
     m, n = x.size(0), y.size(0)
 
-    # xx经过pow()方法计算每个元素的平方，然后在（axis=1）每行上求和，
-    # 此时xx的shape为(m, 1)，经过expand()方法，扩展n-1次，此时xx的shape为(m, n)
-    xx = torch.pow(x, 2).sum(1, keepdim=True).expand(m, n)   # 每一行都一样
-    # yy会在最后进行转置的操作
-    yy = torch.pow(y, 2).sum(1, keepdim=True).expand(n, m).t()   # 每一列都一样
+
+    xx = torch.pow(x, 2).sum(1, keepdim=True).expand(m, n)   
+ 
+    yy = torch.pow(y, 2).sum(1, keepdim=True).expand(n, m).t()   
     dist = xx + yy
     
-    # torch.addmm(beta=1, input, alpha=1, mat1, mat2, out=None)，这行表示的意思是xx + yy - 2 * x * yT
+   
     dist.addmm_(1, -2, x, y.t())
 
-    # clamp()函数限制 dist 张量的元素在一个最小值（1e-12）和最大值之间，以防止数值稳定性问题，
-    # dist最后开方，得到样本之间的距离矩阵
+
     dist = dist.clamp(min=1e-12).sqrt()  # for numerical stability
     return dist
 
-def get_real_labels(label0,label1):  #N=2243 M=30   不管哪个view mask是不变的
-    '''
-    # mask:  标识real_labels两个view的label是否是同一个类别:positive or negative; 正样本label=1,负样本label=0
-    # (category level)/ 同类 real_labels=1  不同类:real_label=0
-    '''
+def get_real_labels(label0,label1):  #N=2243 M=30   
+    
     n0 = label0.shape[0]
     n1 = label1.shape[0]
     mask=torch.zeros((n0,n1))
-    # 1.construct pos. pairs  N个正样本对（行）
+   
     mask[label0[:, np.newaxis] == label1] = 1
     return  mask
   
 def compute_pair_dist(fea,args):
-    # 定义正负样本对
+    
 
     h = fea[:args.batch_size]
     h_PI = fea[args.batch_size:]
